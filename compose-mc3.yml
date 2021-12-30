@@ -1,0 +1,35 @@
+# old
+# mc3 1.17.1 | docker run -d -p 8568:25565 --name mc3 -e EULA=TRUE -v mc3:/data itzg/minecraft-server:java16 
+# 
+# new:
+version: "3"
+
+services:
+  mc3:
+    container_name: mc3
+    image: itzg/minecraft-server:latest
+    ports:
+      - 8568:25565
+    environment:
+      VERSION: "1.17.1" 
+      EULA: "TRUE"
+      JVM_OPTS: "-Dlog4j2.formatMsgNoLookups=true"
+    volumes:
+      - mc3:/data
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+
+volumes:
+    mc3:
+
+# start with:
+# docker-compose -f compose-mc3.yml up -d && docker logs -f mc3
+#
+# log4j check:
+#   PID TTY      STAT   TIME COMMAND
+#     1 pts/0    Ssl+   0:00 mc-server-runner --stop-duration 60s java -Xms1G -Xmx1G -Dlog4j2.formatMsgNoLookups=true -jar minecraft_server.1.17.1.jar
+#    78 pts/0    Sl+    2:36 java -Xms1G -Xmx1G -Dlog4j2.formatMsgNoLookups=true -jar minecraft_server.1.17.1.jar
+#   147 pts/1    Ss     0:00 /bin/bash
+#   158 pts/1    R+     0:00 ps ax
+#

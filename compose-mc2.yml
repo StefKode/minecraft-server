@@ -1,0 +1,41 @@
+# old
+# mc2 1.16 | docker run -d -p 8566:25565 --name mc2 -e EULA=TRUE -v /var/lib/minecraft-data-2:/data itzg/minecraft-server:latest
+# 
+# new:
+version: "3"
+
+services:
+  mc2:
+    container_name: mc2
+    image: itzg/minecraft-server:latest
+    ports:
+      - 8566:25565
+    environment:
+      VERSION: "1.16" 
+      EULA: "TRUE"
+      JVM_OPTS: "-Dlog4j.configurationFile=log4j2_112-116.xml"
+    volumes:
+      - /var/lib/minecraft-data-2:/data
+      - ./log4j2_112-116.xml:/data/log4j2_112-116.xml
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+
+# start with:
+# docker-compose -f compose-mc2.yml up -d && docker logs -f mc2
+#
+# log4j check:
+#  PID TTY      STAT   TIME COMMAND
+#    1 pts/0    Ssl+   0:00 mc-server-runner --stop-duration 60s java -Xms1G -Xmx1G -Dlog4j.configurationFile=log4j2_112-116.xml -jar minecraft_server.1.16.jar
+#   41 pts/0    Sl+    1:41 java -Xms1G -Xmx1G -Dlog4j.configurationFile=log4j2_112-116.xml -jar minecraft_server.1.16.jar
+#  122 pts/1    Ss     0:00 /bin/bash
+#  133 pts/1    R+     0:00 ps ax
+#
+# total 74212
+# -rw-rw-r--  1 minecraft minecraft        2 Dec 30 10:21 banned-ips.json
+# -rw-rw-r--  1 minecraft minecraft        2 Dec 30 10:21 banned-players.json
+# drwxrwxr-x  2 minecraft minecraft     4096 Jun 23  2020 config
+# drwxrwxr-x  2 minecraft minecraft     4096 Nov 13  2020 crash-reports
+# -rw-rw-r--  1 minecraft minecraft       65 Jun 23  2020 eula.txt
+# -rw-r--r--  1 minecraft sudo          1131 Dec 10 11:13 log4j2_112-116.xml <<<<<<<< HERE
+# -rw-r--r--  1 minecraft minecraft     1367 Jun 23  2020 log4j2.xml

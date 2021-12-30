@@ -1,0 +1,25 @@
+#!/bin/bash
+
+function v116 {
+	echo "-----------------------------------------------------------"
+	echo "| Report on MC$1 |"
+	echo "------------------"
+	echo ""
+	docker exec -it mc$1 ps ax
+	docker exec -it mc$1 ls -l 
+	echo ""
+}
+
+function v117 {
+	echo "-----------------------------------------------------------"
+	echo "| Report on MC$1 |"
+	echo "------------------"
+	echo ""
+	docker exec -it mc$1 ps ax
+	echo ""
+}
+
+
+v117 1
+v116 2
+v117 3

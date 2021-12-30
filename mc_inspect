@@ -1,0 +1,43 @@
+#!/bin/bash
+
+
+function whitelist {
+	docker exec -i mc$1 rcon-cli whitelist list | sort | sed -e 's/^.*: //' -e 's/, /\n/g'
+}
+
+function users {
+	docker exec -i mc$1 rcon-cli list | sort | sed -e 's/^.*: //' -e 's/, /\n/g'
+}
+
+function lastlog {
+	docker logs -t mc$1 | grep -v RCON | tail -n 20
+}
+
+
+function check {
+	echo "================================================"
+	echo "| Inspect MC$1 |"
+	echo "==============="
+	echo ""
+	echo "WHITELIST:"
+	echo "----------"
+	whitelist $1
+	echo ""
+	echo "ACTIVE-USERS:"
+	echo "-------------"
+	users $1
+	echo ""
+	echo "LAST-LOG:"
+	echo "----------"
+	lastlog $1
+	echo ""
+}
+
+clear
+echo ""
+docker ps | grep minecraft
+echo ""
+
+check 1
+check 2
+check 3
