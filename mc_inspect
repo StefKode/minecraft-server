@@ -1,5 +1,26 @@
 #!/bin/bash
 
+cwd=$(dirname $(readlink -f $0))
+
+function header {
+    cat $cwd/header.html
+}
+
+function h1 {
+    echo "<h1>$1</h1>"
+}
+
+function h2 {
+    echo "<h2>$1</h2>"
+}
+
+function tablestart {
+    echo "<table>"
+}
+
+function tableend {
+    echo "</table>"
+}
 
 function whitelist {
 	docker exec -i mc$1 rcon-cli whitelist list | sort | sed -e 's/^.*: //' -e 's/, /\n/g'
@@ -11,6 +32,16 @@ function users {
 
 function lastlog {
 	docker logs -t mc$1 | grep -v RCON | tail -n 20
+}
+
+function formatps {
+    sed -e 's/^.* itz/<tr><td>itz/' \
+        -e 's/  .*ago[ ]*/<\/td><td>/' \
+        -e 's/ [0-9][0-9]*.tcp.*->/ /' \
+        -e 's/\/tcp//' \
+        -e 's/) */)<\/td><td>/' \
+        -e 's/ *mc/<\/td><td>mc/' \
+        -e 's/$/<\/td><\/tr>/'
 }
 
 
@@ -33,11 +64,13 @@ function check {
 	echo ""
 }
 
-clear
-echo ""
-docker ps | grep minecraft
-echo ""
+header
+h1 "Minecraft Server Information"
+h2 "Server Status"
+tablestart
+docker ps | formatps
+tableend
 
-check 1
-check 2
-check 3
+#check 1
+#check 2
+#check 3
