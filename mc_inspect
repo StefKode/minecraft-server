@@ -6,6 +6,11 @@ function header {
     cat $cwd/header.html
 }
 
+function footer {
+    echo "</body>"
+    echo "</html>"
+}
+
 function h1 {
     echo "<h1>$1</h1>"
 }
@@ -15,7 +20,7 @@ function h2 {
 }
 
 function tablestart {
-    echo "<table>"
+    echo "<table class=\"$1\">"
 }
 
 function tableend {
@@ -23,54 +28,69 @@ function tableend {
 }
 
 function whitelist {
-	docker exec -i mc$1 rcon-cli whitelist list | sort | sed -e 's/^.*: //' -e 's/, /\n/g'
+	docker exec -i mc$1 rcon-cli whitelist list | sort | sed -e 's/^.*: //' -e 's/, /<br>/g'
 }
 
 function users {
-	docker exec -i mc$1 rcon-cli list | sort | sed -e 's/^.*: //' -e 's/, /\n/g'
+	docker exec -i mc$1 rcon-cli list | sort | sed -e 's/^.*: //' -e 's/, /<br>/g'
 }
 
 function lastlog {
-	docker logs -t mc$1 | grep -v RCON | tail -n 20
+	#docker logs -t mc$1 | grep -v RCON | grep -v "Preparing spawn area" | grep '\[' | tail -n 20 
+	echo "<tr><th>Date</th><th>Time</th><th>Level</th><th>Message</th></tr>"
+	docker logs -t mc$1 | grep -v RCON | grep -v "Preparing spawn area" | grep '\[' | tail -n 20 | \
+	sed -e 's/^/<tr><td>/' \
+	    -e 's/T.*Z \[/<\/td><td>/' \
+	    -e 's/\] /<\/td><td>/'  \
+	    -e 's/\[.*\/\([WIE]\)/\1/' \
+	    -e 's/\]: /<\/td><td>/' \
+	    -e 's///g'  \
+	    -e 's/$/<\/td><\/tr>/'
 }
 
 function formatps {
-    sed -e 's/^.* itz/<tr><td>itz/' \
-        -e 's/  .*ago[ ]*/<\/td><td>/' \
-        -e 's/ [0-9][0-9]*.tcp.*->/ /' \
-        -e 's/\/tcp//' \
-        -e 's/) */)<\/td><td>/' \
-        -e 's/ *mc/<\/td><td>mc/' \
-        -e 's/$/<\/td><\/tr>/'
+    grep 'mc[0-9]<' | \
+    sed -e 's/##.*://' \
+        -e 's/->.*##//' \
+	-e 's/####//'
 }
 
+function dockerps {
+	docker ps -a --format "<tr><td>{{.Names}}</td><td>{{.Image}}</td><td>{{.Status}}</td><td>##{{.Ports}}##</td></tr>"
+}
 
 function check {
-	echo "================================================"
-	echo "| Inspect MC$1 |"
-	echo "==============="
-	echo ""
-	echo "WHITELIST:"
-	echo "----------"
+	h1 "Server MC$1"
+	h2 "Users"
+	tablestart users
+	echo "<tr><th>Whitelist</th><th>Active</th></tr>"
+	echo "<tr><td>"
 	whitelist $1
-	echo ""
-	echo "ACTIVE-USERS:"
-	echo "-------------"
+	echo "</td><td>"
 	users $1
-	echo ""
-	echo "LAST-LOG:"
-	echo "----------"
+	echo "</td></tr>"
+	tableend
+	h2 "Last Log"
+	tablestart log
 	lastlog $1
-	echo ""
+	tableend
+}
+
+function showtime {
+	echo "<div class=\"showtime\">Last Update: "
+	date +%Y-%m-%d\ %H:%M:%S
+	echo "</div>"
 }
 
 header
-h1 "Minecraft Server Information"
+h1 "Marisa's Minecraft Server Information"
+showtime
 h2 "Server Status"
-tablestart
-docker ps | formatps
+tablestart ps
+echo "<tr><th>Name</th><th>Image</th><th>Status</th><th>Port</th></tr>"
+dockerps | formatps
 tableend
-
-#check 1
-#check 2
-#check 3
+check 1
+check 2
+check 3
+footer
